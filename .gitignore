@@ -1,9 +1,11 @@
 .DS_Store
 node_modules
 /dist
+vendor/
 
 # local env files
 .env.local
+.env.dev
 .env.*.local
 
 # Log files
@@ -19,3 +21,9 @@ yarn-error.log*
 *.njsproj
 *.sln
 *.sw?
+
+
+# Ignore credential files
+.access.token
+.refresh.token
+.expirationTime

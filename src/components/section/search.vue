@@ -38,23 +38,24 @@
 
 
 <script>
+import axios from "axios";
+
 export default {
-    name: 'search',
+    name: 'section-search',
     data() {
         return {
             search: {
                 query: '',
             },
             timer: '',
+
+            results: null,
         }
     },
     methods: {
         toggle_search() {
             var button_container = this.$refs.button;
             var input_container = this.$refs.input;
-
-            // eslint-disable-next-line no-console
-            // console.log(this);
 
             // Toggle states
             if ((button_container.style.display == 'none') && (input_container.getElementsByTagName('input')[0].value == '')) {
@@ -91,17 +92,31 @@ export default {
         },
 
         perform_search() {
-            fetch('http://example.com/movies.json')
-                .then(function(response) {
-                    return response.json();
-                })
-                .then(function(myJson) {
-                    // eslint-disable-next-line no-console
-                    console.log(JSON.stringify(myJson));
-                });
+            var input_container = this.$refs.input;
+            var input_field = input_container.getElementsByTagName('input')[0];
+
+            var results_component = this.$parent.$children.find(child => { return child.$options.name === "section-search_results"; });
+            results_component.reset();
+            results_component.pre_execution();
+
+            if (input_field.value.length > 0) {
+                var data = { q: input_field.value };
+                axios.post('/api/spotify/search/artist', data)
+                    .then(response => {
+                        // Find the results element and update it
+                        results_component.process_results(response);
+                    }).catch(err => {
+                        // eslint-disable-next-line no-console
+                        // console.error(err);
+                        results_component.error_encountered('We\'ve encountered an error contacting the server.');
+                        results_component.post_execution();
+                    });
+            } // End of if "Do we have anything to search on"
+
         },
     },
 }
+
 </script>
 
 <style scoped>

@@ -1,45 +1,36 @@
 <template>
-  <div id="app" class="small-container">
-    <h1>Search Spotify</h1>
+<div id="app">
+    <div class="overflow-visible sidebar-open">
+        <layout_header />
 
-    <search />
+        <layout_sidebar />
 
-    <results-table :results="results" />
-  </div>
+        <main class="mt-16 lg:mt-20 overflow-y-visible overflow-x-hidden lg:overflow-x-visible ml-menu p-6">
+
+            <template_search />
+
+        </main>
+    </div>
+</div>
 </template>
 
 <script>
-import Search from '@/components/Search.vue'
-import ResultsTable from '@/components/SearchResults.vue'
+// Layout
+import layout_header from '@/components/layout/header.vue'
+import layout_sidebar from '@/components/layout/sidebar.vue'
+
+// Templates
+import template_search from '@/components/templates/search.vue'
 
 export default {
-  name: 'app',
-  components: {
-    Search,
-    ResultsTable
-},
+    name: 'app',
+    components: {
+        layout_header,
+        layout_sidebar,
 
-  data() {
-    return {
-      results: [
-        {
-          id: 1,
-          name: 'Richard Hendricks',
-          email: 'richard@piedpiper.com',
-        },
-        {
-          id: 2,
-          name: 'Bertram Gilfoyle',
-          email: 'gilfoyle@piedpiper.com',
-        },
-        {
-          id: 3,
-          name: 'Dinesh Chugtai',
-          email: 'dinesh@piedpiper.com',
-        },
-      ],
-    }
-  },
+        // Templates
+        template_search,
+    },
 
 }
 </script>
