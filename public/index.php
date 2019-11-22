@@ -46,9 +46,7 @@
         Flight::get('spotify')->setOptions([
             'auto_refresh' => true,
         ]);
-        // Flight::get('spotify')->setAccessToken($access_token);
     });
-
 
     // Load controllers
     $base_path = $_SERVER['PROJECT_ROOT'].'/controllers/';
