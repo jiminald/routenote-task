@@ -10,10 +10,10 @@
             </tr>
         </thead>
         <tbody class="bg-white">
-            <tr class="border rounded border-indigo-25" v-for="result in results" :key="result.id" v-on:click="get_top_tracks" :data-artist_id="result.id" :data-artist_name="result.name">
+            <tr class="border rounded border-indigo-25" v-for="result in results" :key="result.id" :data-artist_id="result.id" :data-artist_name="result.name">
                 <td>
                     <div class="w-24 h-24 bg-indigo-5 inline-flex items-center justify-center mr-4 rounded">
-                        <img :src="result.images[2].url" v-if="typeof result.images !== 'undefined' && '2' in result.images">
+                        <img :src="result.images[2].url" :width="result.images[2].width" :height="result.images[2].height" v-if="typeof result.images !== 'undefined' && '2' in result.images">
                         <svg version="1.1" viewBox="0 0 84.7 67.1" class="svg-icon svg-original" data-name="missing-image" style="width: 50%; height: 50%;" v-else>
                             <g fill="#c9cce0">
                                 <path pid="0" d="M59.2 12.3c-4.1 1-6.6 5.1-5.7 9.2 1 4.1 5.1 6.6 9.2 5.7s6.6-5.1 5.7-9.2-5.1-6.7-9.2-5.7zm3.1 12.9c-3 .7-6.1-1.2-6.8-4.2s1.2-6.1 4.2-6.8c3-.7 6.1 1.2 6.8 4.2s-1.2 6.1-4.2 6.8zM27.9 22.8c-1.6-2.4-4.6-3.6-7.5-2.9-3.3.8-5.5 3.8-5.4 7.1-1.6.8-2.5 2.6-2.1 4.4.1.6.5 1.2.9 1.7.2.3.6.4 1 .3l17.4-4.1c.4-.1.7-.4.8-.8.1-.6.1-1.2-.1-1.8-.6-2.5-2.7-4.1-5-3.9zm3.1 4.5l-16 3.8c-.1-.1-.1-.2-.1-.3-.2-1 .4-2 1.4-2.2.5-.1.8-.6.8-1.1-.4-2.6 1.3-5.1 3.8-5.7 2.2-.5 4.6.5 5.6 2.6.2.4.7.6 1.1.5 1.5-.3 3 .6 3.3 2.1 0 .1 0 .2.1.3z"></path>
@@ -229,6 +229,9 @@ export default {
                 if ((this.response.artists.items.length > 0) && (this.response.artists.next === null)) {
                     document.getElementById('end-of-list').style.display = '';
                 } // End of if "Do we have any artists and are we at the end of our list"
+            } else {
+                // No artists, no results
+                document.getElementById('no-results').style.display = '';
             } // End of if "Do we have any items to evaluate against"
 
             // Now we can report that we've finished processing
@@ -313,7 +316,6 @@ export default {
                 });
         }, // End of function "next_page"
 
-
         get_top_tracks: function(element) {
             // Get parent TR
             var parent_tr = this.find_parent_tr(element.target);
@@ -323,8 +325,6 @@ export default {
             var top_tracks_component = this.$parent.$children.find(child => { return child.$options.name === "section-top_tracks"; });
             top_tracks_component.fetch_tracks(element_data.artist_name, element_data.artist_id);
         }, // End of function "get_top_tracks"
-
-
 
         // Source: https://stackoverflow.com/a/2524345
         find_parent_tr: function(element) {

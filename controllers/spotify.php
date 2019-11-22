@@ -12,7 +12,7 @@
             // Set default options
             $options = [
                 'offset' => 0,
-                'limit' => $_ENV['spotify_api_search_limit'],
+                'limit' => ((array_key_exists('spotify_api_search_limit', $_ENV) == TRUE) ? $_ENV['spotify_api_search_limit'] : 10),
             ];
 
             // Get query

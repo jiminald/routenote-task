@@ -6,14 +6,14 @@
         <spinner id="top_tracks_spinner" />
 
         <div class="block my-4 py-3" v-for="result in results" :key="result.id">
-            <h5 class="block">{{ result.name }}</h5>
+            <h5 class="block">
+                {{ result.name }}
+                <div class="stars-outer" :id="result.id" v-rating="{ id: result.id, rating: result.popularity }">
+                    <div class="stars-inner"></div>
+                </div>
+            </h5>
+
             <small>Duration: {{ result.duration_ms | ms_to_time }}</small>
-
-            <div>Rating: * * * - -</div>
-
-            <div class="stars-outer" :id="result.id" v-rating="{ id: result.id, rating: result.popularity }">
-                <div class="stars-inner"></div>
-            </div>
 
             <div>
                 <a :href="result.external_urls.spotify" target="_blank" class="group btn relative transition btn-small btn-secondary" v-if="result.is_playable == true">
@@ -121,14 +121,9 @@ export default {
 
             axios.get('/api/spotify/artist/' + artist_id + '/top_tracks')
                 .then(response => {
-                    // this.process_results(response);
                     this.results = response.data.tracks;
                 }).catch(err => {
-                    // eslint-disable-next-line no-console
                     console.error(err);
-
-                    // this.error_encountered(error);
-
                 }).finally(function() {
                     // Still run post-execution
                     _self.post_execution();

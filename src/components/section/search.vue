@@ -25,7 +25,7 @@
         </div>
 
         <div class="input-icon right m-px rounded">
-            <svg version="1.1" viewBox="0 0 13.1 13" class="cursor-pointer select-none text-indigo-50 mr-1 mt-1 float-right svg-icon" data-name="medium-modal-cross" style="width: 16px; height: 16px; display: none;" v-on:click="search_clear">
+            <svg version="1.1" viewBox="0 0 13.1 13" class="cursor-pointer select-none text-indigo-50 mr-1 mt-1 float-right svg-icon" data-name="medium-modal-cross" style="width: 16px; height: 16px; display: none;" v-on:click="reset">
                 <g _fill="none" _stroke="#293584" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10">
                     <path pid="0" d="M.1.1l12.8 12.8M12.9.1L.1 12.9"></path>
                 </g>
@@ -36,7 +36,6 @@
 </div>
 </template>
 
-
 <script>
 import axios from "axios";
 
@@ -44,6 +43,11 @@ export default {
     name: 'section-search',
     data() {
         return {
+            results_component: null,
+            input_container: null,
+            input_field: null,
+            button_container: null,
+
             search: {
                 query: '',
             },
@@ -51,70 +55,94 @@ export default {
 
             results: null,
         }
-    },
+    }, // End of vue.js declaration "data"
+
+    mounted() {
+        // Setup pointers to everything we need
+        this.results_component = this.$parent.$children.find(child => { return child.$options.name === "section-search_results"; });
+
+        this.button_container = this.$refs.button;
+
+        this.input_container = this.$refs.input;
+        this.input_field = this.input_container.getElementsByTagName('input')[0];
+    }, // End of vue.js declaration "mounted"
+
     methods: {
         toggle_search() {
-            var button_container = this.$refs.button;
-            var input_container = this.$refs.input;
-
             // Toggle states
-            if ((button_container.style.display == 'none') && (input_container.getElementsByTagName('input')[0].value == '')) {
-                button_container.style.display = '';
-                input_container.style.display = 'none';
+            if ((this.button_container.style.display == 'none') && (this.input_field.value == '')) {
+                // Hide input
+                this.button_container.style.display = '';
+                this.input_container.style.display = 'none';
             } else {
-                button_container.style.display = 'none';
-                input_container.style.display = '';
-                input_container.getElementsByTagName('input')[0].focus();
-            }
-        },
+                // Show input
+                this.button_container.style.display = 'none';
+                this.input_container.style.display = '';
+
+                // If we have nothing in the input, focus it
+                if (this.input_field.value == '') {
+                    this.input_field.focus();
+                } // End of if "Do we have a value in the input"
+            } // End of if "What state is the button in"
+        }, // End of function "toggle_search"
 
         search_keydown() {
-            var input_container = this.$refs.input;
-            var icon_right = input_container.getElementsByClassName('input-icon right')[0];
+            // Grab the svg
+            var icon_right = this.input_container.getElementsByClassName('input-icon right')[0];
             var icon_right_svg = icon_right.getElementsByTagName('svg')[0];
-            if (input_container.getElementsByTagName('input')[0].value !== '') {
+
+            // Do we have a value to process on
+            if (this.input_field.value !== '') {
+                // Show the cancel button
                 icon_right_svg.style.display = '';
 
-                // Stop timer and reset
+                // Stop timer and reset. Execute a search after 500ms of idle time
                 clearTimeout(this.timer);
                 this.timer = setTimeout(this.perform_search, 500);
             } else {
                 icon_right_svg.style.display = 'none';
-            }
-        },
+            } // End of if "Input value check"
+        }, // End of function "search_keydown"
 
-        search_clear() {
-            var input_container = this.$refs.input;
-            var input_field = input_container.getElementsByTagName('input')[0];
+        reset() {
+            // Empty and refocus the user
+            this.input_field.value = '';
+            this.input_field.focus();
 
-            input_field.value = '';
-            input_field.focus();
-        },
+            // Reset the results component
+            this.results_component.reset();
+        }, // End of function "reset"
 
         perform_search() {
-            var input_container = this.$refs.input;
-            var input_field = input_container.getElementsByTagName('input')[0];
+            // Reset the results component and prepare for a new execution run
+            this.results_component.reset();
+            this.results_component.pre_execution();
 
-            var results_component = this.$parent.$children.find(child => { return child.$options.name === "section-search_results"; });
-            results_component.reset();
-            results_component.pre_execution();
+            if (this.input_field.value.length > 0) {
+                // Build postdata
+                var data = { q: this.input_field.value };
 
-            if (input_field.value.length > 0) {
-                var data = { q: input_field.value };
+                // Send for execution
                 axios.post('/api/spotify/search/artist', data)
                     .then(response => {
                         // Find the results element and update it
-                        results_component.process_results(response);
+                        this.results_component.process_results(response);
                     }).catch(err => {
-                        // eslint-disable-next-line no-console
-                        // console.error(err);
-                        results_component.error_encountered('We\'ve encountered an error contacting the server.');
-                        results_component.post_execution();
+                        // Display error if one is encountered
+                        this.results_component.error_encountered('We\'ve encountered an error contacting the server.');
+                        this.results_component.post_execution();
                     });
-            } // End of if "Do we have anything to search on"
+            } else {
+                // Zero out results response, as we are not getting any
+                this.results_component.response = {};
 
-        },
-    },
+                // End results post execution
+                this.results_component.post_execution();
+            }// End of if "Do we have anything to search on"
+
+        }, // End of function "perform_search"
+
+    }, // End of vue.js declaration "methods"
 }
 
 </script>
